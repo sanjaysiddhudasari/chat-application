@@ -30,11 +30,12 @@ io.on("connection", (socket) => {
     socket.emit("message", {
       user: "admin",
       text: `${user.name}, welcome to the room ${user.room}`,
+      createdAt:new Date()//here
     });
 
     socket.broadcast
       .to(user.room)
-      .emit("message", { user: "admin", text: `${user.name} has joined` });
+      .emit("message", { user: "admin", text: `${user.name} has joined`,createdAt:new Date() });//here
 
     io.to(user.room).emit("roomData", {
       room: user.room,
@@ -51,6 +52,7 @@ io.on("connection", (socket) => {
     io.to(user.room).emit("message", {
       user: user.name,
       text: message,
+      createdAt:new Date()
     });
 
     io.to(user.room).emit("roomData", {
@@ -67,6 +69,7 @@ io.on("connection", (socket) => {
       io.to(user.room).emit("message", {
         user: "admin",
         text: `${user.name} has left`,
+        createdAt:new Date()
       });
     }
     console.log("user disconnected");
