@@ -5,13 +5,16 @@ const http = require("http");
 const PORT = process.env.PORT || 5000;
 const router = require("./router");
 const { addUser, removeUser, getUser, getUsersInRoom } = require("./users");
+const {addTypingUser,removeTypingUser,getTypingUsersInRoom} =require('./typingUsers');
 
 const app = express();
 const server = http.createServer(app);
 
 const io = socketio(server, {
   cors: {
-    origin: process.env.CLIENT_URL ,
+    origin: process.env.NODE_ENV === "production"
+        ? process.env.CLIENT_URL
+        : "http://localhost:3000" ,
     methods: ["GET", "POST"],
   },
 });
@@ -26,6 +29,8 @@ io.on("connection", (socket) => {
     if (error) return callback(error);
 
     socket.join(user.room);
+
+    socket.emit('typing:update',getTypingUsersInRoom(room));
 
     socket.emit("message", {
       user: "admin",
@@ -63,6 +68,19 @@ io.on("connection", (socket) => {
     callback();
   });
 
+
+  socket.on('typing:start',({room,name})=>{
+      addTypingUser(name,room);
+      const typingUsers=getTypingUsersInRoom(room);
+      io.to(room).emit('typing:update',typingUsers);
+  });
+
+  socket.on('typing:stop',({room,name})=>{
+    removeTypingUser(name,room);
+    const typingUsers=getTypingUsersInRoom(room);
+    io.to(room).emit('typing:update',typingUsers);
+  });
+
   socket.on("disconnect", () => {
     const user = removeUser(socket.id);
     if (user) {
@@ -71,6 +89,8 @@ io.on("connection", (socket) => {
         text: `${user.name} has left`,
         createdAt:new Date()
       });
+      removeTypingUser(user.name,user.room);
+      io.to(user.room).emit('typing:update',getTypingUsersInRoom(user.room));
     }
     console.log("user disconnected");
   });
