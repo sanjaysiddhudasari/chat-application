@@ -12,9 +12,7 @@ const server = http.createServer(app);
 
 const io = socketio(server, {
   cors: {
-    origin: process.env.NODE_ENV === "production"
-        ? process.env.CLIENT_URL
-        : "http://localhost:3000" ,
+    origin:  process.env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });
