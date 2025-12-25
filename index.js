@@ -16,11 +16,8 @@ const server = http.createServer(app);
 const connect = async () => {
   try {
     await connectDb();
-  } catch (e) {
-    console.log(e);
-  }
-}
-connect();
+    console.log("data base connected");
+  
 
 const io = socketio(server, {
   cors: {
@@ -131,3 +128,10 @@ socket.on("disconnect", () => {
 server.listen(PORT, () => {
   console.log(`server is running on ${PORT}`);
 });
+
+}
+ catch (e) {
+    console.log(e);
+  }
+}
+connect();
