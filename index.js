@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
     const totalData=await Message.find({});
     console.log("totaldata: ",totalData);
     const messages = await Message.aggregate([{ $match: { room: room } }, { $sort: { createdAt: -1 } }, { $limit:30  }]);
+    messages.reverse();
     
   // emit last 30 messages to the room
   for(let message of messages ){
