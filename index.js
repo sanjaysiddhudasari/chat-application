@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
 
     //load history from db(max 30 prev messages from room)
     const totalData=await Message.find({});
-    console.log("totaldata: ",totalData);
+    // console.log("totaldata: ",totalData);
     const messages = await Message.aggregate([{ $match: { room: room } }, { $sort: { createdAt: -1 } }, { $limit:30  }]);
     messages.reverse();
     
@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
         createdAt:message.createdAt
       })
   }
-  console.log(messages);
+  // console.log(messages);
 
 
   socket.emit("message", {
@@ -108,6 +108,15 @@ socket.on('typing:stop', ({ room, name }) => {
   removeTypingUser(name, room);
   const typingUsers = getTypingUsersInRoom(room);
   io.to(room).emit('typing:update', typingUsers);
+});
+
+// loadMoreMessages (pagination)
+
+socket.on('loadMoreMessages',async({room,cursor})=>{
+  if(!room||!cursor)return;
+  const olderMessages=await Message.find({createdAt:{$lt:cursor}}).limit(30).sort({createdAt:-1});
+  console.log(olderMessages);
+  socket.emit('olderMessages',olderMessages);
 });
 
 socket.on("disconnect", () => {
