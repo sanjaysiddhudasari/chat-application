@@ -114,7 +114,7 @@ socket.on('typing:stop', ({ room, name }) => {
 
 socket.on('loadMoreMessages',async({room,cursor})=>{
   if(!room||!cursor)return;
-  const olderMessages=await Message.find({createdAt:{$lt:cursor}}).limit(10).sort({createdAt:-1});
+  const olderMessages=await Message.find({createdAt:{$lt:cursor},room:room}).limit(10).sort({createdAt:-1});
   console.log(olderMessages);
   olderMessages.reverse();
   socket.emit('olderMessages',olderMessages);
